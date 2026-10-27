@@ -1,0 +1,14 @@
+{
+  "domain": "homaic",
+  "name": "Homaic",
+  "codeowners": ["@homaic/ha"],
+  "config_flow": true,
+  "dependencies": ["http", "my"],
+  "documentation": "https://github.com/homaic/ha-homaic",
+  "integration_type": "service",
+  "iot_class": "cloud_push",
+  "issue_tracker": "https://github.com/homaic/ha-homaic/issues",
+  "requirements": [],
+  "single_config_entry": true,
+  "version": "0.1.0"
+}

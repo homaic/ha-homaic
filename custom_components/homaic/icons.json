@@ -1,0 +1,7 @@
+{
+  "services": {
+    "send_devices": {
+      "service": "mdi:home-import-outline"
+    }
+  }
+}

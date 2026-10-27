@@ -1,0 +1,53 @@
+{
+  "config": {
+    "step": {
+      "reauth_confirm": {
+        "title": "Sign in with Homaic again",
+        "description": "Homaic signed this Home Assistant out."
+      }
+    },
+    "abort": {
+      "already_configured": "This Homaic account is already signed in.",
+      "single_instance_allowed": "Homaic is already set up.",
+      "cannot_connect": "Homaic could not be reached. Try again.",
+      "cannot_register": "Homaic did not accept this Home Assistant. Try again.",
+      "wrong_account": "That is a different Homaic account. Sign in with the one you used before.",
+      "reauth_successful": "Signed in again.",
+      "oauth_error": "Homaic sent something it should not have. Try again.",
+      "oauth_failed": "Homaic did not finish signing in. Try again.",
+      "oauth_timeout": "Homaic took too long. Try again.",
+      "oauth_unauthorized": "Homaic did not accept the sign-in. Try again.",
+      "user_rejected_authorize": "Sign-in was cancelled.",
+      "missing_configuration": "Homaic is not set up for sign-in.",
+      "authorize_url_timeout": "Homaic took too long. Try again.",
+      "no_url_available": "Home Assistant has no address set. [More about this]({docs_url})"
+    },
+    "create_entry": {
+      "default": "Signed in."
+    }
+  },
+  "entity": {
+    "button": {
+      "send_devices": {
+        "name": "Send devices to Homaic"
+      }
+    }
+  },
+  "services": {
+    "send_devices": {
+      "name": "Send devices to Homaic",
+      "description": "Sends every device, its room and floor, to your Homaic house as a list to look over."
+    }
+  },
+  "exceptions": {
+    "not_loaded": { "message": "Homaic is not set up." },
+    "no_devices": { "message": "Home Assistant has no devices to send." },
+    "too_many": { "message": "{count} devices is more than Homaic takes at once ({limit})." },
+    "too_big": { "message": "That is more than Homaic takes at once." },
+    "signed_out": { "message": "Homaic signed this Home Assistant out. Sign in again." },
+    "busy": { "message": "Homaic is busy. Send again in a minute." },
+    "refused": { "message": "Homaic did not accept the send." },
+    "unreachable": { "message": "Homaic could not be reached. Try again." },
+    "homaic_said": { "message": "{message}" }
+  }
+}
