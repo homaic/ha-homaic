@@ -16,9 +16,11 @@ The first send happens on its own. After that, press **Send devices to Homaic**,
 
 For each device: Home Assistant's own number for it, its name, the name you gave it, maker, model, model id, serial number, software and hardware versions, its area, the device it connects through, which integrations it belongs to, and whether Home Assistant lists it as a service or as turned off. For each device, the types of its main entities (light, lock, sensor and so on). For each area: Home Assistant's own number for it, its name and its floor. For each floor: its number, name and level. For each integration a device belongs to: Home Assistant's number for it and its kind, such as `zha` or `hue`. And the version of Home Assistant.
 
-Never sent: entity ids or names, states, MAC addresses or other connections, the identifiers each integration gives a device, configuration URLs, integration titles, or any token or password.
+Never sent: entity ids or names, any other state, MAC addresses or other connections, the identifiers each integration gives a device, configuration URLs, integration titles, or any token or password.
 
 Homaic takes up to 2,000 devices in one send.
+
+When a battery runs low (15% or under), a filter is due (10% of its life or under), or water is found, Home Assistant tells Homaic, so the job is written down on that thing: the device's own number, which of the three it is, the percent, and when. It tells Homaic again when the reading is back. Smoke, carbon monoxide, gas, doors, locks and motion are never sent.
 
 ## Sign out
 

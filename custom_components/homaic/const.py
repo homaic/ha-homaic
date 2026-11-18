@@ -14,6 +14,8 @@ MCP_URL: Final = "https://mcp.homaic.io/v1/mcp"
 # The name Homaic shows on its consent page and under Settings, Your AI.
 CLIENT_NAME: Final = "Home Assistant"
 TOOL: Final = "devices_offer"
+# a battery low, a filter due, water found (signals.py)
+SIGNAL_TOOL: Final = "signal_offer"
 
 # Homaic's own limits (devices_offer): more is refused there, so it is
 # refused here first, never cut.

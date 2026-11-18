@@ -37,16 +37,14 @@ class SendError(HomeAssistantError):
         )
 
 
-def body_of(payload: dict[str, Any]) -> bytes:
-    """The JSON-RPC call, refused here when Homaic would refuse it."""
-    if len(payload["devices"]) > MAX_DEVICES:
-        raise SendError("too_many", count=len(payload["devices"]), limit=MAX_DEVICES)
+def call_body(tool: str, arguments: dict[str, Any]) -> bytes:
+    """One JSON-RPC tools/call, refused here when Homaic would refuse its size."""
     body = json.dumps(
         {
             "jsonrpc": "2.0",
             "id": 1,
             "method": "tools/call",
-            "params": {"name": TOOL, "arguments": payload},
+            "params": {"name": tool, "arguments": arguments},
         },
         separators=(",", ":"),
         ensure_ascii=False,
@@ -56,14 +54,16 @@ def body_of(payload: dict[str, Any]) -> bytes:
     return body
 
 
-async def async_send(hass: HomeAssistant, entry: ConfigEntry) -> int:
-    """Send the devices; return how many Homaic kept. Raises SendError."""
-    session: OAuth2Session = entry.runtime_data
-    payload = build_payload(hass)
-    if not payload["devices"]:
-        raise SendError("no_devices")
-    body = body_of(payload)
+def body_of(payload: dict[str, Any]) -> bytes:
+    """The devices_offer call, refused here when Homaic would refuse it."""
+    if len(payload["devices"]) > MAX_DEVICES:
+        raise SendError("too_many", count=len(payload["devices"]), limit=MAX_DEVICES)
+    return call_body(TOOL, payload)
 
+
+async def async_call(hass: HomeAssistant, entry: ConfigEntry, body: bytes) -> str:
+    """Post one tools/call; return the tool's text. Raises SendError."""
+    session: OAuth2Session = entry.runtime_data
     try:
         await session.async_ensure_token_valid()
     except ClientResponseError as err:
@@ -110,6 +110,15 @@ async def async_send(hass: HomeAssistant, entry: ConfigEntry) -> int:
     if result.get("isError"):
         # Homaic's own sentence: what went wrong and what to do
         raise SendError("homaic_said", message=text)
+    return text
+
+
+async def async_send(hass: HomeAssistant, entry: ConfigEntry) -> int:
+    """Send the devices; return how many Homaic kept. Raises SendError."""
+    payload = build_payload(hass)
+    if not payload["devices"]:
+        raise SendError("no_devices")
+    text = await async_call(hass, entry, body_of(payload))
     try:
         kept = json.loads(text)
         list_id = str(kept["list_id"])

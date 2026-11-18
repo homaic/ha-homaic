@@ -1,4 +1,5 @@
-"""Homaic: send this Home Assistant's devices to a Homaic house."""
+"""Homaic: send this Home Assistant's devices to a Homaic house, and tell it
+when a battery runs low, a filter is due, or water is found."""
 
 from __future__ import annotations
 
@@ -19,6 +20,7 @@ from homeassistant.helpers.typing import ConfigType
 from .const import CONF_OFFERED, DOMAIN, SERVICE_SEND
 from .oauth import implementation
 from .send import NOTIFICATION_ID, SendError, async_send
+from .signals import SignalWatch
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -53,6 +55,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: HomaicConfigEntry) -> bo
         raise ConfigEntryNotReady from err
     entry.runtime_data = session
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
+
+    watch = SignalWatch(hass, entry)
+    await watch.async_start()
+    entry.async_on_unload(watch.async_stop)
 
     if not entry.data.get(CONF_OFFERED):
         # The first send happens on its own, once; after that, the button.
