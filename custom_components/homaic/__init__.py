@@ -4,6 +4,7 @@ when a battery runs low, a filter is due, or water is found."""
 from __future__ import annotations
 
 import logging
+from datetime import datetime, timedelta
 from http import HTTPStatus
 
 from aiohttp import ClientError, ClientResponseError
@@ -15,6 +16,7 @@ from homeassistant.core import HomeAssistant, ServiceCall
 from homeassistant.exceptions import ConfigEntryAuthFailed, ConfigEntryNotReady, ServiceValidationError
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.config_entry_oauth2_flow import OAuth2Session, async_register_implementation
+from homeassistant.helpers.event import async_track_time_interval
 from homeassistant.helpers.typing import ConfigType
 
 from .const import CONF_OFFERED, DOMAIN, SERVICE_SEND
@@ -25,6 +27,9 @@ from .signals import SignalWatch
 _LOGGER = logging.getLogger(__name__)
 
 PLATFORMS = [Platform.BUTTON]
+# Homaic ends a Home Assistant connection after 30 days unused. A quiet house
+# sends nothing for weeks, so the sign-in is renewed once a day.
+RENEW = timedelta(days=1)
 CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
 
 type HomaicConfigEntry = ConfigEntry[OAuth2Session]
@@ -60,10 +65,29 @@ async def async_setup_entry(hass: HomeAssistant, entry: HomaicConfigEntry) -> bo
     await watch.async_start()
     entry.async_on_unload(watch.async_stop)
 
+    async def renew(_now: datetime) -> None:
+        await _renew(hass, entry)
+
+    entry.async_on_unload(async_track_time_interval(hass, renew, RENEW))
+
     if not entry.data.get(CONF_OFFERED):
         # The first send happens on its own, once; after that, the button.
         entry.async_create_background_task(hass, _first_send(hass, entry), f"{DOMAIN} first send")
     return True
+
+
+async def _renew(hass: HomeAssistant, entry: HomaicConfigEntry) -> None:
+    """Renew the sign-in. Refused, it asks to sign in again; unreachable, it
+    waits for the next day."""
+    try:
+        await entry.runtime_data.async_ensure_token_valid()
+    except ClientResponseError as err:
+        if HTTPStatus.BAD_REQUEST <= err.status < HTTPStatus.INTERNAL_SERVER_ERROR:
+            entry.async_start_reauth(hass)
+        else:
+            _LOGGER.warning("Homaic did not renew the sign-in: %s", err)
+    except ClientError as err:
+        _LOGGER.warning("Homaic did not renew the sign-in: %s", err)
 
 
 async def _first_send(hass: HomeAssistant, entry: HomaicConfigEntry) -> None:
