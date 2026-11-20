@@ -20,7 +20,7 @@ Never sent: entity ids or names, any other state, MAC addresses or other connect
 
 Homaic takes up to 2,000 devices in one send.
 
-When a battery runs low (15% or under), a filter is due (10% of its life or under), or water is found, Home Assistant tells Homaic, so the job is written down on that thing: the device's own number, which of the three it is, the percent, and when. It tells Homaic again when the reading is back. Smoke, carbon monoxide, gas, doors, locks and motion are never sent.
+When a battery runs low (15% or under) or a filter is due (10% of its life or under), Home Assistant tells Homaic, so the job is written down on that thing: the device's own number, which of the two it is, the percent, and when. It tells Homaic again when the reading is back, and the job closes. Water leaks, smoke, carbon monoxide, gas, doors, locks and motion are never sent.
 
 ## Sign out
 

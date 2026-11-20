@@ -64,10 +64,10 @@ async def set_up(hass: HomeAssistant, entry) -> None:
         ("sensor", {"unit_of_measurement": "%"}, "8", {"translation_key": "filter_life"}, ("filter", True, 8)),
         ("sensor", {"unit_of_measurement": "%"}, "8", {"translation_key": "humidity"}, None),
         ("binary_sensor", {"device_class": "battery"}, "on", {}, ("battery", True, None)),
-        ("binary_sensor", {"device_class": "moisture"}, "on", {}, ("water", True, None)),
-        ("binary_sensor", {"device_class": "moisture"}, "off", {}, ("water", False, None)),
         ("binary_sensor", {"device_class": "problem"}, "on", {"translation_key": "replace_filter"}, ("filter", True, None)),
         # never a job: the alarm and Home Assistant own these
+        ("binary_sensor", {"device_class": "moisture"}, "on", {}, None),
+        ("binary_sensor", {"device_class": "moisture"}, "off", {}, None),
         ("binary_sensor", {"device_class": "smoke"}, "on", {}, None),
         ("binary_sensor", {"device_class": "carbon_monoxide"}, "on", {}, None),
         ("binary_sensor", {"device_class": "gas"}, "on", {}, None),
@@ -133,7 +133,8 @@ async def test_battery_low_then_back(hass: HomeAssistant, config_entry, aioclien
     assert len(sent(aioclient_mock)) == 3
 
 
-async def test_water_found_then_dry(hass: HomeAssistant, config_entry, aioclient_mock, no_first_send) -> None:
+async def test_a_leak_is_never_sent(hass: HomeAssistant, config_entry, aioclient_mock, no_first_send) -> None:
+    """Home Assistant stays the leak alarm: a leak makes no job (0.3.0)."""
     dev = a_device(hass, "Water heater leak sensor")
     eid = an_entity(hass, dev, "binary_sensor", "leak")
     hass.states.async_set(eid, "off", {"device_class": "moisture"})
@@ -143,10 +144,7 @@ async def test_water_found_then_dry(hass: HomeAssistant, config_entry, aioclient
     await settle(hass)
     hass.states.async_set(eid, "off", {"device_class": "moisture"})
     await settle(hass)
-    assert [[(s["kind"], s["level"], s["cleared"]) for s in call] for call in sent(aioclient_mock)] == [
-        [("water", None, False)],
-        [("water", None, True)],
-    ]
+    assert aioclient_mock.call_count == 0
 
 
 async def test_smoke_is_never_sent(hass: HomeAssistant, config_entry, aioclient_mock, no_first_send) -> None:

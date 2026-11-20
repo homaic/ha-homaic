@@ -1,5 +1,5 @@
 """Homaic: send this Home Assistant's devices to a Homaic house, and tell it
-when a battery runs low, a filter is due, or water is found."""
+when a battery runs low or a filter is due."""
 
 from __future__ import annotations
 
