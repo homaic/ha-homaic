@@ -1,10 +1,11 @@
-"""Tell Homaic when a battery runs low, a filter is due, or water is found.
+"""Tell Homaic when a battery runs low or a filter is due.
 
 Home Assistant decides here, on the house. Homaic gets one small message when
 a line is crossed and one when the reading is back: the device's own number,
-which of the three it is, the percent, and when. Nothing else leaves: no
-entity ids or names, no other state, no history. Smoke, CO, gas, doors, locks
-and motion are never sent; Home Assistant and the alarm own those moments.
+which of the two it is, the percent, and when. Nothing else leaves: no
+entity ids or names, no other state, no history. Water leaks, smoke, CO, gas,
+doors, locks and motion are never sent; Home Assistant and the alarm own those
+moments.
 """
 
 from __future__ import annotations
@@ -80,8 +81,6 @@ def reading_of(entry: er.RegistryEntry, state: State | None) -> tuple[str, bool,
     if entry.domain == "binary_sensor":
         if dc == "battery":
             kind = "battery"
-        elif dc == "moisture":
-            kind = "water"
         elif dc in FILTER_BINARY_CLASSES and "filter" in words:
             kind = "filter"
         else:
